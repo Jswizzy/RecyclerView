@@ -3,16 +3,18 @@ package android.example.com.recyclerview
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), GreenAdapter.ListItemClickListner {
 
     /*
      * References to RecyclerView and Adapter to reset the list to its
      * "pretty" state when the reset menu item is clicked.
      */
-    private var mAdapter: GreenAdapter? = null
+    private lateinit var mAdapter: GreenAdapter
+    private var mToast: Toast? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,9 +48,16 @@ class MainActivity : AppCompatActivity() {
         /*
          * The GreenAdapter is responsible for displaying each item in the list.
          */
-        mAdapter = GreenAdapter(NUM_LIST_ITEMS)
+        mAdapter = GreenAdapter(NUM_LIST_ITEMS, this)
 
         rv_numbers.adapter = mAdapter
+    }
+
+    override fun onListItemClick(clickedItemIndex: Int) {
+        mToast?.cancel()
+
+        mToast = Toast.makeText(this, "Item #$clickedItemIndex clicked.", Toast.LENGTH_LONG)
+        mToast?.show()
     }
 
     companion object {

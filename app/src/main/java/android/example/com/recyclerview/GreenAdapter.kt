@@ -6,6 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.content.ContentValues.TAG
+import android.example.com.recyclerview.GreenAdapter.NumberViewHolder
+
+
 
 /**
  * We couldn't come up with a good name for this class. Then, we realized
@@ -19,14 +23,19 @@ import android.widget.TextView
  * If you don't like our puns, we named this Adapter GreenAdapter because its
  * contents are green.
  */
-class GreenAdapter
+internal class GreenAdapter
 /**
  * Constructor for GreenAdapter that accepts a number of items to display and the specification
  * for the ListItemClickListener.
  *
  * @param numberOfItems Number of items to display in list
  */
-(private val mNumberItems: Int) : RecyclerView.Adapter<GreenAdapter.NumberViewHolder>() {
+(private val mNumberItems: Int, val listner: ListItemClickListner) : RecyclerView.Adapter<GreenAdapter.NumberViewHolder>() {
+    private var viewHolderCount: Int = 0
+
+    interface ListItemClickListner {
+        fun onListItemClick(clickedItemIndex: Int)
+    }
 
     /**
      *
@@ -47,8 +56,21 @@ class GreenAdapter
         val shouldAttachToParentImmediately = false
 
         val view = inflater.inflate(layoutIdForListItem, viewGroup, shouldAttachToParentImmediately)
+        val viewHolder = NumberViewHolder(view)
 
-        return NumberViewHolder(view)
+        // COMPLETED (12) Set the text of viewHolderIndex to "ViewHolder index: " + viewHolderCount
+        viewHolder.viewHolderIndex.setText("ViewHolder index: $viewHolderCount")
+
+        // COMPLETED (13) Use ColorUtils.getViewHolderBackgroundColorFromInstance and pass in a Context and the viewHolderCount
+        val backgroundColorForViewHolder = ColorUtils
+                .getViewHolderBackgroundColorFromInstance(context, viewHolderCount)
+        // COMPLETED (14) Set the background color of viewHolder.itemView with the color from above
+        viewHolder.itemView.setBackgroundColor(backgroundColorForViewHolder)
+
+        // COMPLETED (15) Increment viewHolderCount and log its value
+        viewHolderCount++
+        Log.d(TAG, "onCreateViewHolder: number of ViewHolders created: $viewHolderCount")
+        return viewHolder
     }
 
     /**
@@ -76,12 +98,10 @@ class GreenAdapter
         return mNumberItems
     }
 
-    // COMPLETED (12) Create a class called NumberViewHolder that extends RecyclerView.ViewHolder
     /**
      * Cache of the children views for a list item.
      */
-    inner class NumberViewHolder
-    // COMPLETED (14) Create a constructor for NumberViewHolder that accepts a View called itemView as a parameter
+    internal inner class NumberViewHolder
     /**
      * Constructor for our ViewHolder. Within this constructor, we get a reference to our
      * TextViews and set an onClickListener to listen for clicks. Those will be handled in the
@@ -89,22 +109,26 @@ class GreenAdapter
      * @param itemView The View that you inflated in
      * [GreenAdapter.onCreateViewHolder]
      */
-    (itemView: View) : RecyclerView.ViewHolder(itemView) {
+    (itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
 
-        // COMPLETED (13) Within NumberViewHolder, create a TextView variable called listItemNumberView
         // Will display the position in the list, ie 0 through getItemCount() - 1
         var listItemNumberView: TextView = itemView.findViewById<View>(R.id.tv_item_number) as TextView
+        // COMPLETED (10) Add a TextView variable to display the ViewHolder index
+        // Will display which ViewHolder is displaying this data
+        var viewHolderIndex: TextView = itemView.findViewById(R.id.tv_view_holder_instance) as TextView
 
-        // COMPLETED (16) Within the NumberViewHolder class, create a void method called bind that accepts an int parameter called listIndex
         /**
          * A method we wrote for convenience. This method will take an integer as input and
          * use that integer to display the appropriate text within a list item.
          * @param listIndex Position of the item in the list
          */
         fun bind(listIndex: Int) {
-            // COMPLETED (17) Within bind, set the text of listItemNumberView to the listIndex
-            // COMPLETED (18) Be careful to get the String representation of listIndex, as using setText with an int does something different
             listItemNumberView.text = listIndex.toString()
+            itemView.setOnClickListener(this)
+        }
+
+        override fun onClick(v: View) {
+            listner.onListItemClick(adapterPosition)
         }
     }
 
